@@ -1,250 +1,71 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCmKqbovKv1e72a7mUlGIi1Tu8BnMyoL_A",
+  authDomain: "human-eye-mcq-test.firebaseapp.com",
+  projectId: "human-eye-mcq-test",
+  storageBucket: "human-eye-mcq-test.firebasestorage.app",
+  messagingSenderId: "1081982023377",
+  appId: "1:1081982023377:web:ef9b458516ffcc6a6b37f0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 const questions = [
-    {
-        q: "The part of human eye which controls the amount of light entering into it:",
-        options: ["Iris", "Cornea", "Ciliary muscle", "Pupil"],
-        answer: 0
-    },
-    {
-        q: "Most of the refraction for the light rays entering the eye occurs at:",
-        options: ["Iris", "Pupil", "Crystalline lens", "Outer surface of cornea"],
-        answer: 3
-    },
-    {
-        q: "The curvature of eye lens of human eye:",
-        options: ["is fixed.", "can be increased.", "can be decreased.", "increase or decrease as per the case"],
-        answer: 3
-    },
-    {
-        q: "The lens system of human eye forms an image on a light sensitive screen, which is called as:",
-        options: ["Cornea", "Ciliary muscle", "Optic nerve", "Retina"],
-        answer: 3
-    },
-    {
-        q: "The pair of eye parts responsible for admitting different amount of light into the eyes is:",
-        options: ["Iris and pupil", "Ciliary muscles and pupil", "Retina and Iris", "Ciliary muscles and cornea"],
-        answer: 0
-    },
-    {
-        q: "When you look at an object very close to your eyes, the:",
-        options: [
-            "Ciliary muscles of your eye contract and the eye lens becomes thick.",
-            "Ciliary muscles of your eye get relaxed and the eye lens becomes thick.",
-            "Ciliary muscles of your eye contract and the eye lens becomes thin.",
-            "Ciliary muscles of your eye get relaxed and the eye lens becomes thin."
-        ],
-        answer: 0
-    },
-    {
-        q: "The human eye forms the image of an object at its",
-        options: ["Retina", "Pupil", "Cornea", "Iris"],
-        answer: 0
-    },
-    {
-        q: "The change in focal length of an eye lens is caused by the action of the",
-        options: ["Pupil", "Retina", "Ciliary muscles", "Iris"],
-        answer: 2
-    },
-    {
-        q: "The focal length of the eye lens increases when eye muscles",
-        options: [
-            "are relaxed and lens becomes thinner",
-            "contract and lens becomes thicker",
-            "are relaxed and lens becomes thicker",
-            "contract and lens becomes thinner"
-        ],
-        answer: 0
-    },
-    {
-        q: "How long does the light from an event stay in our eye?",
-        options: ["1/16 th of a second", "1/10 th of a second", "1/18 th of a second", "1/24 th of a second"],
-        answer: 1
-    },
-    {
-        q: "Light enters the eye through a thin membrane covering the front surface of the eyeball. What is this transparent outer layer called?",
-        options: ["Pupil", "Sclera", "Cornea", "Crystalline lens"],
-        answer: 2
-    },
-    {
-        q: "What is the nature of the image formed on the retina of a human eye?",
-        options: ["Virtual and erect", "Real and erect", "Virtual and inverted", "Real and inverted"],
-        answer: 3
-    },
-    {
-        q: "The retina contains two types of light-sensitive cells: rods and cones. What is the specific function of rod cells?",
-        options: [
-            "Respond to colour difference",
-            "Control pupil contraction",
-            "Respond to intensity of light (dim light vision)",
-            "Adjust the focal length of the eye lens"
-        ],
-        answer: 2
-    }
+  {q:"Which part of the eye controls the amount of light entering the eye?",o:["Iris","Retina","Cornea","Lens"]},
+  {q:"Most of the refraction of light entering the eye occurs at the:",o:["Eye lens","Retina","Iris","Outer surface of cornea"]},
+  {q:"The curvature of the eye lens can be:",o:["Only increased","Only decreased","Kept constant","Increased or decreased as required"]},
+  {q:"The light-sensitive screen of the eye is the:",o:["Cornea","Iris","Lens","Retina"]},
+  {q:"Which pair admits different amounts of light into the eye?",o:["Iris and pupil","Cornea and retina","Lens and retina","Iris and lens"]},
+  {q:"To see a nearby object clearly, the ciliary muscles:",o:["Contract and the lens becomes thicker","Relax and the lens becomes thinner","Contract and the lens becomes thinner","Relax and the lens becomes thicker"]},
+  {q:"The image of an object in the human eye is formed on the:",o:["Retina","Iris","Cornea","Pupil"]},
+  {q:"The change in focal length of the eye lens is caused by:",o:["Retina","Pupil","Ciliary muscles","Cornea"]},
+  {q:"The focal length of the eye lens increases when the ciliary muscles are:",o:["Relaxed and the lens is thinner","Contracted and the lens is thicker","Contracted and the lens is thinner","Relaxed and the lens is thicker"]},
+  {q:"The sensation produced by light from an event remains in the eye for about:",o:["1/16 second","1/10 second","1/2 second","1 second"]},
+  {q:"The transparent outer layer of the eye is called:",o:["Retina","Iris","Cornea","Pupil"]},
+  {q:"The image formed on the retina is:",o:["Virtual and erect","Virtual and inverted","Real and erect","Real and inverted"]},
+  {q:"Rods in the retina mainly help in:",o:["Colour vision","Sharp vision in bright light","Vision in dim light / responding to light intensity","Changing focal length"]}
 ];
 
-let currentQuestion = 0;
-let selectedAnswers = new Array(questions.length).fill(null);
-let studentName = "";
-let rollNo = "";
-let timeLeft = 10 * 60;
-let timerInterval = null;
-let testStarted = false;
-let submitted = false;
+let current=0, answers=Array(questions.length).fill(null), timerId=null, secondsLeft=600, started=false, submitted=false;
+const $=id=>document.getElementById(id);
 
-function startTest() {
-    studentName = document.getElementById("studentName").value.trim();
-    rollNo = document.getElementById("rollNo").value.trim();
+window.startTest=()=>{
+ const name=$("studentName").value.trim(), roll=$("rollNo").value.trim();
+ if(!name||!roll){alert("Please enter your name and roll number.");return;}
+ $("guidance").classList.remove("hidden");
+ started=true; $("startScreen").classList.add("hidden"); $("testScreen").classList.remove("hidden"); $("bottomNav").classList.remove("hidden");
+ render(); startTimer();
+};
 
-    if (!studentName || !rollNo) {
-        alert("Please enter your name and roll number.");
-        return;
-    }
-
-    testStarted = true;
-    document.getElementById("startScreen").classList.add("hidden");
-    document.getElementById("testScreen").classList.remove("hidden");
-    document.getElementById("bottomNav").classList.remove("hidden");
-    startTimer();
-    showQuestion();
+function startTimer(){
+ updateTimer();
+ timerId=setInterval(()=>{secondsLeft--;updateTimer();if(secondsLeft<=0){clearInterval(timerId);submitTest(true)}},1000);
 }
-
-function startTimer() {
-    updateTimer();
-
-    timerInterval = setInterval(() => {
-        timeLeft--;
-        updateTimer();
-
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            submitTest(true);
-        }
-    }, 1000);
+function updateTimer(){const m=String(Math.floor(secondsLeft/60)).padStart(2,'0'),s=String(secondsLeft%60).padStart(2,'0');$("timer").textContent=`${m}:${s}`;$("smallTimer").textContent=`${m}:${s}`;}
+function render(){
+ const item=questions[current]; $("questionCounter").textContent=`${current+1}/${questions.length}`; $("questionText").textContent=item.q; $("progressBar").style.width=`${((current+1)/questions.length)*100}%`;
+ const box=$("options");box.innerHTML="";
+ item.o.forEach((text,i)=>{const b=document.createElement("button");b.className="option"+(answers[current]===i?" selected":"");b.innerHTML=`<span class="letter">${String.fromCharCode(65+i)}.</span><span>${text}</span>`;b.onclick=()=>{answers[current]=i;render()};box.appendChild(b)});
+ $("previousBtn").disabled=current===0; $("nextBtn").textContent=current===questions.length-1?"Submit":"Next";
 }
+window.nextQuestion=()=>{if(current===questions.length-1){submitTest(false);return}current++;render()};
+window.previousQuestion=()=>{if(current>0){current--;render()}};
+window.goBack=()=>{if(!started)return; if(confirm("Leave the test? Your current progress will be lost.")) location.reload()};
 
-function updateTimer() {
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    const text = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-
-    document.getElementById("timer").textContent = text;
-    document.getElementById("smallTimer").textContent = text;
-}
-
-function showQuestion() {
-    const q = questions[currentQuestion];
-
-    document.getElementById("questionCounter").textContent =
-        `${currentQuestion + 1}/${questions.length}`;
-
-    document.getElementById("progressBar").style.width =
-        `${((currentQuestion + 1) / questions.length) * 100}%`;
-
-    document.getElementById("questionText").textContent =
-        `${currentQuestion + 1}. ${q.q}`;
-
-    const container = document.getElementById("options");
-    container.innerHTML = "";
-
-    q.options.forEach((option, index) => {
-        const button = document.createElement("button");
-        button.className = "option";
-
-        if (selectedAnswers[currentQuestion] === index) {
-            button.classList.add("selected");
-        }
-
-        button.textContent =
-            `${String.fromCharCode(65 + index)}. ${option}`;
-
-        button.onclick = () => {
-            selectedAnswers[currentQuestion] = index;
-            showQuestion();
-        };
-
-        container.appendChild(button);
-    });
-
-    document.getElementById("previousBtn").disabled =
-        currentQuestion === 0;
-
-    document.getElementById("nextBtn").textContent =
-        currentQuestion === questions.length - 1 ? "Submit" : "Next";
-}
-
-function previousQuestion() {
-    if (currentQuestion > 0) {
-        currentQuestion--;
-        showQuestion();
-    }
-}
-
-function nextQuestion() {
-    if (currentQuestion < questions.length - 1) {
-        currentQuestion++;
-        showQuestion();
-    } else {
-        submitTest(false);
-    }
-}
-
-function submitTest(autoSubmitted = false) {
-    if (submitted) return;
-
-    if (!testStarted) {
-        alert("Please start the test first.");
-        return;
-    }
-
-    const unanswered = selectedAnswers.filter(a => a === null).length;
-
-    if (!autoSubmitted && unanswered > 0) {
-        const ok = confirm(
-            `You have ${unanswered} unanswered question(s). Do you want to submit?`
-        );
-        if (!ok) return;
-    }
-
-    let score = 0;
-
-    selectedAnswers.forEach((selected, index) => {
-        if (selected === questions[index].answer) {
-            score++;
-        }
-    });
-
-    const result = {
-        name: studentName,
-        rollNo: rollNo,
-        answers: selectedAnswers,
-        score: score,
-        total: questions.length,
-        submittedAt: new Date().toISOString()
-    };
-
-    // TEMPORARY DEMO STORAGE.
-    // This will later be replaced by Firebase so the teacher
-    // receives every student's result online.
-    const results = JSON.parse(
-        localStorage.getItem("eyeTestResults") || "[]"
-    );
-    results.push(result);
-    localStorage.setItem("eyeTestResults", JSON.stringify(results));
-
-    submitted = true;
-    clearInterval(timerInterval);
-
-    // Open the submission confirmation as a separate page.
-    window.location.href = "submitted.html";
-}
-
-function goBack() {
-    if (!testStarted || submitted) return;
-
-    const ok = confirm(
-        "Going back may leave the test. Are you sure?"
-    );
-
-    if (ok) {
-        location.reload();
-    }
-}
+window.submitTest=async function(auto=false){
+ if(submitted||!started)return;
+ if(!auto && !confirm("Submit your test now?"))return;
+ submitted=true;clearInterval(timerId);
+ const name=$("studentName").value.trim(), rollNo=$("rollNo").value.trim();
+ try{
+   await addDoc(collection(db,"submissions"),{name,rollNo,answers,submittedAt:serverTimestamp(),questionCount:questions.length,remainingSeconds:secondsLeft});
+   location.href="submitted.html";
+ }catch(err){
+   submitted=false;
+   console.error(err);
+   alert("Your response could not be submitted. Please check the Firebase setup/rules and try again.");
+ }
+};

@@ -7,51 +7,32 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <header class="app-header">
     <button class="back-btn" onclick="goBack()" aria-label="Back">‹</button>
-    <div class="timer" id="timer">30:00</div>
+    <div class="timer" id="timer">10:00</div>
     <button class="top-submit" id="topSubmit" onclick="submitTest()">SUBMIT</button>
 </header>
-
 <main>
-    <section id="startScreen" class="start-screen">
-        <div class="start-card">
-            <h1>Human Eye</h1>
-            <p>MCQ Test • 13 Questions</p>
-
-            <input id="studentName" type="text" placeholder="Student Name" autocomplete="name">
-            <input id="rollNo" type="text" placeholder="Roll Number">
-
-            <div class="guidance">Under the guidance of Bishal Sir</div>
-
-            <button class="start-button" onclick="startTest()">START TEST</button>
-        </div>
-    </section>
-
-    <section id="testScreen" class="test-screen hidden">
-        <div class="status-row">
-            <span id="questionCounter">1/13</span>
-            <span>Time: <b id="smallTimer">30:00</b></span>
-        </div>
-
-        <div class="progress-track">
-            <div id="progressBar"></div>
-        </div>
-
-        <div class="question-card">
-            <div id="questionText" class="question-text"></div>
-            <div id="options"></div>
-        </div>
-    </section>
-
+<section id="startScreen" class="start-screen">
+<div class="start-card">
+<h1>Human Eye</h1>
+<p>MCQ Test • 13 Questions</p>
+<input id="studentName" type="text" placeholder="Student Name" autocomplete="name">
+<input id="rollNo" type="text" placeholder="Roll Number">
+<div id="guidance" class="guidance hidden">Under the guidance of Bishal Sir</div>
+<button class="start-button" onclick="startTest()">START TEST</button>
+</div>
+</section>
+<section id="testScreen" class="test-screen hidden">
+<div class="status-row"><span id="questionCounter">1/13</span><span>Time: <b id="smallTimer">10:00</b></span></div>
+<div class="progress-track"><div id="progressBar"></div></div>
+<div class="question-card"><div id="questionText" class="question-text"></div><div id="options"></div></div>
+</section>
 </main>
-
 <footer id="bottomNav" class="bottom-nav hidden">
-    <button id="previousBtn" onclick="previousQuestion()">Previous</button>
-    <button id="nextBtn" onclick="nextQuestion()">Next</button>
+<button id="previousBtn" onclick="previousQuestion()">Previous</button>
+<button id="nextBtn" onclick="nextQuestion()">Next</button>
 </footer>
-
-<script src="script.js"></script>
+<script type="module" src="script.js"></script>
 </body>
 </html>
