@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Results</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.results-wrap { padding: 25px 16px; }
+.result-card { background:#fff; padding:22px; border-radius:12px; box-shadow:0 3px 14px rgba(0,0,0,.1); overflow:auto; }
+table { border-collapse:collapse; width:100%; min-width:1000px; }
+th,td { border:1px solid #ddd; padding:9px; text-align:center; }
+th { background:#f5f5f5; }
+.clear { margin-top:18px; padding:12px 16px; border:0; border-radius:7px; background:#d33; color:#fff; }
+</style>
+</head>
+<body>
+<header class="app-header">
+    <div class="timer">Teacher Results</div>
+</header>
+<main class="results-wrap">
+<div class="result-card">
+<div id="results"></div>
+<button class="clear" onclick="clearResults()">Clear Demo Results</button>
+</div>
+</main>
+
+<script>
+const data = JSON.parse(localStorage.getItem("eyeTestResults") || "[]");
+const box = document.getElementById("results");
+
+if (!data.length) {
+    box.innerHTML = "<h2>No submissions yet.</h2>";
+} else {
+    let html = "<table><tr><th>Name</th><th>Roll No.</th>";
+    for (let i = 1; i <= 13; i++) html += "<th>Q" + i + "</th>";
+    html += "<th>Marks</th><th>Submitted</th></tr>";
+
+    data.forEach(s => {
+        html += "<tr><td>" + esc(s.name) + "</td><td>" + esc(s.rollNo) + "</td>";
+        s.answers.forEach(a => {
+            html += "<td>" + (a === null ? "-" : String.fromCharCode(65 + a)) + "</td>";
+        });
+        html += "<td>" + s.score + "/" + s.total + "</td>";
+        html += "<td>" + new Date(s.submittedAt).toLocaleString() + "</td></tr>";
+    });
+
+    html += "</table>";
+    box.innerHTML = html;
+}
+
+function esc(v) {
+    return String(v).replace(/[&<>"']/g, c => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;"
+    }[c]));
+}
+
+function clearResults() {
+    if (confirm("Clear all demo results from this browser?")) {
+        localStorage.removeItem("eyeTestResults");
+        location.reload();
+    }
+}
+</script>
+</body>
+</html>
